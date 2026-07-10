@@ -15,7 +15,7 @@ function makeService() {
   const { Service } = require('node-windows');
   return new Service({
     name: P.SERVICE_NAME,
-    description: 'STRIPARCO content-filter & screen-time guard (tamper protection).',
+    description: 'STRIPARCOP content-filter & screen-time guard (tamper protection).',
     script: SERVICE_SCRIPT,
     execPath: process.execPath,              // electron.exe, run as Node below
     env: [{ name: 'ELECTRON_RUN_AS_NODE', value: '1' }],

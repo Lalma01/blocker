@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta charset="UTF-8">
-  <title>STRIPARCO</title>
+  <title>STRIPARCOP</title>
   <link rel="stylesheet" href="theme.css">
   <style>
     body.centered { padding-top: 36px; }
@@ -10,7 +10,8 @@
   </style>
 </head>
 <body class="centered">
-  <h1><span class="brand">STRIPARCO</span></h1>
+  <h1><span class="brand">STRIPARCOP</span></h1>
+  <p style="color:var(--muted);font-size:.72rem;letter-spacing:.08em;margin:-2px 0 8px;text-transform:uppercase">Strict Parental Control Program</p>
   <p class="subtitle" data-i18n="idx_sub">Aktívan védi a böngészőt a nem kívánt tartalmaktól</p>
 
   <div class="grid">
@@ -45,7 +46,7 @@
     <button class="btn btn-secondary" id="screenTimeBtn" data-i18n="btn_screentime">Képernyőidő</button>
   </div>
 
-  <div class="footer">STRIPARCO v<span id="appVersion">…</span> · <span data-i18n="footer_text">Minden szűrés helyi · Nincs adatküldés</span></div>
+  <div class="footer">STRIPARCOP v<span id="appVersion">…</span> · <span data-i18n="footer_text">Minden szűrés helyi · Nincs adatküldés</span></div>
 
   <script src="i18n.js"></script>
   <script>
@@ -63,8 +64,7 @@
       if (cfg.screen_time_limit <= 0) { st.textContent = window.t('val_unlimited'); st.className='card-value green'; }
       else if (rem === 0) { st.textContent = window.t('val_expired'); st.className='card-value red'; }
       else {
-        const h=Math.floor(rem/3600),m=Math.floor((rem%3600)/60);
-        st.textContent = h>0 ? `${h}${window.t('u_h')} ${m}${window.t('u_m')}` : `${m}${window.t('u_m')}`;
+        st.textContent = window.fmtDuration(rem);
         st.className = rem < 300 ? 'card-value orange' : 'card-value green';
       }
       const as = document.getElementById('autoStart');

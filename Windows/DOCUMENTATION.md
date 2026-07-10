@@ -1,4 +1,6 @@
-# STRIPARCO — Technical Documentation
+# STRIPARCOP — Technical Documentation
+
+*STRIPARCOP = Strict Parental Control Program*
 
 *Magyar dokumentáció a [második részben](#striparco--magyar-dokumentáció).*
 

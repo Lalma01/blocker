@@ -1,8 +1,8 @@
 {
   "name": "striparco",
-  "version": "1.12.21",
-  "description": "STRIPARCO – Windows NSFW / NSFW-AI content filter & screen time guard",
-  "author": "STRIPARCO",
+  "version": "1.12.22",
+  "description": "STRIPARCOP (Strict Parental Control Program) – Windows NSFW / NSFW-AI content filter & screen time guard",
+  "author": "STRIPARCOP",
   "main": "app/main.js",
   "scripts": {
     "start": "electron .",
@@ -10,7 +10,7 @@
   },
   "build": {
     "appId": "com.striparco.app",
-    "productName": "STRIPARCO",
+    "productName": "STRIPARCOP",
     "asar": false,
     "directories": {
       "buildResources": "assets",

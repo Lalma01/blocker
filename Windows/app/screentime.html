@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta charset="UTF-8">
-  <title data-i18n-title="st_title">Képernyőidő – STRIPARCO</title>
+  <title data-i18n-title="st_title">Képernyőidő – STRIPARCOP</title>
   <link rel="stylesheet" href="theme.css">
   <style>
     .ring-wrap { position: relative; width: 180px; height: 180px; margin: 0 auto 24px; }
@@ -100,11 +100,8 @@ function fmt(sec) {
   return h>0 ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
               : `${m}:${String(s).padStart(2,'0')}`;
 }
-function fmtMin(sec) {
-  if (sec < 0) return window.t('val_unlimited');
-  const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60);
-  return h>0 ? `${h}${window.t('u_h')} ${m}${window.t('u_m')}` : `${m}${window.t('u_m')}`;
-}
+// Consistent "H óra M perc" everywhere via the shared formatter.
+function fmtMin(sec) { return window.fmtDuration(sec); }
 
 function updateRing(remaining, used, limit) {
   const total = limit * 60;
@@ -114,7 +111,7 @@ function updateRing(remaining, used, limit) {
   document.getElementById('ringTime').textContent = remaining < 0 ? '∞' : fmt(remaining);
   document.getElementById('ringLabel').textContent = remaining < 0 ? window.t('ring_unlimited') : window.t('ring_left');
   document.getElementById('usedVal').textContent = fmtMin(used);
-  document.getElementById('limitVal').textContent = limit > 0 ? limit + ' ' + window.t('unit_min') : window.t('val_unlimited');
+  document.getElementById('limitVal').textContent = limit > 0 ? window.fmtDuration(limit * 60) : window.t('val_unlimited');
   document.getElementById('progressFill').style.width = (pct * 100) + '%';
   const lm = document.getElementById('limitMsg');
   const closeBtn = document.getElementById('closeBtn');

@@ -1,8 +1,10 @@
-# STRIPARCO
+# STRIPARCOP
+
+*Strict Parental Control Program*
 
 [Magyar leírás lejjebb](#magyar)
 
-**STRIPARCO** is a Windows content filter and screen-time guard. It blocks adult and
+**STRIPARCOP** is a Windows content filter and screen-time guard. It blocks adult and
 NSFW-AI websites locally (mainstream AI assistants stay accessible), monitors browser
 titles, and lets you set a daily screen-time limit. The interface follows your system
 light/dark theme and is available in English and Hungarian.

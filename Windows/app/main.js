@@ -77,7 +77,7 @@ const WHITELIST_AI_KEYWORDS = ['grok', 'claude', 'perplexity', 'gemini', 'chatgp
 // ── Main-process translations ──────────────────────────────────────────────
 const MSG = {
   hu: {
-    tray_open: 'STRIPARCO megnyitása', tray_screentime: 'Képernyőidő',
+    tray_open: 'STRIPARCOP megnyitása', tray_screentime: 'Képernyőidő',
     tray_settings: 'Beállítások', tray_exit: 'Kilépés',
     tray_unlimited: 'Korlátlan', tray_left: 'maradt',
     notif_time_title: 'Képernyőidő',
@@ -88,10 +88,10 @@ const MSG = {
     err_pw_time: 'Jelszó szükséges a módosításhoz',
     err_pw_old: 'Hibás régi jelszó', err_pw_min: 'Min. 4 karakter szükséges',
     err_pw_wrong: 'Hibás jelszó',
-    u_h: 'ó', u_m: 'p', u_s: 'mp',
+    u_h: 'ó', u_m: 'p', u_s: 'mp', dur_h: 'óra', dur_m: 'perc',
   },
   en: {
-    tray_open: 'Open STRIPARCO', tray_screentime: 'Screen Time',
+    tray_open: 'Open STRIPARCOP', tray_screentime: 'Screen Time',
     tray_settings: 'Settings', tray_exit: 'Exit',
     tray_unlimited: 'Unlimited', tray_left: 'left',
     notif_time_title: 'Screen Time',
@@ -102,7 +102,7 @@ const MSG = {
     err_pw_time: 'Password required to make this change',
     err_pw_old: 'Wrong current password', err_pw_min: 'Minimum 4 characters required',
     err_pw_wrong: 'Wrong password',
-    u_h: 'h', u_m: 'm', u_s: 's',
+    u_h: 'h', u_m: 'm', u_s: 's', dur_h: 'h', dur_m: 'min',
   },
 };
 const tr = key => (MSG[config.lang] || MSG.hu)[key] || (MSG.hu[key] || key);
@@ -127,10 +127,8 @@ const escRx      = s   => s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const fmtTime    = sec => {
   if (sec < 0) return '∞';
   sec = Math.floor(sec);
-  const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
-  return h > 0
-    ? `${h}${tr('u_h')} ${m}${tr('u_m')}`
-    : `${m}${tr('u_m')} ${String(s).padStart(2,'0')}${tr('u_s')}`;
+  const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60);
+  return `${h} ${tr('dur_h')} ${m} ${tr('dur_m')}`;
 };
 
 // ── Config ─────────────────────────────────────────────────────────────────
@@ -390,7 +388,7 @@ function updateTray() {
   if (!tray || tray.isDestroyed()) return;
   const rem = getRemaining();
   const timeStr = rem < 0 ? tr('tray_unlimited') : fmtTime(rem) + ' ' + tr('tray_left');
-  tray.setToolTip(`STRIPARCO  ·  ${timeStr}`);
+  tray.setToolTip(`STRIPARCOP  ·  ${timeStr}`);
 }
 
 // True when time should not be counted: explicit pause (lock/suspend) or system idle
@@ -663,7 +661,7 @@ function openScreenTimeWindow() {
 function createTray() {
   const iconPath = path.join(__dirname, '..', 'assets', 'icons', 'win', 'icon.ico');
   tray = new Tray(iconPath);
-  tray.setToolTip('STRIPARCO');
+  tray.setToolTip('STRIPARCOP');
   tray.on('click', openMainWindow);
   buildTrayMenu();
 }
