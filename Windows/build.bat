@@ -1,7 +1,7 @@
 @echo off
-REM STRIPARCO – Build Script
+REM PS-BLOCK – Build Script
 echo ============================================
-echo  STRIPARCO – Telepito keszitese
+echo  PS-BLOCK – Telepito keszitese
 echo ============================================
 echo.
 
@@ -33,6 +33,6 @@ if %errorlevel% neq 0 ( echo HIBA: Build sikertelen! & pause & exit /b 1 )
 
 echo.
 echo ============================================
-echo  KESZ! Telepito: dist\STRIPARCO Setup*.exe
+echo  KESZ! Telepito: dist\PS-BLOCK Setup*.exe
 echo ============================================
 pause

@@ -1,4 +1,4 @@
-package com.striparco.app
+package com.psblock.app
 
 /**
  * Comprehensive set of Android browser package names that the title monitor watches.

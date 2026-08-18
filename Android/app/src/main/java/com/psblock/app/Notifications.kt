@@ -1,4 +1,4 @@
-package com.striparco.app
+package com.psblock.app
 
 import android.content.Context
 import androidx.core.app.NotificationManagerCompat
@@ -20,7 +20,7 @@ object Notifications {
 
     private fun notify(ctx: Context, title: String, body: String) {
         if (!NotificationManagerCompat.from(ctx).areNotificationsEnabled()) return
-        val n = androidx.core.app.NotificationCompat.Builder(ctx, StriparcoApp.CH_ALERT)
+        val n = androidx.core.app.NotificationCompat.Builder(ctx, PsBlockApp.CH_ALERT)
             .setSmallIcon(R.drawable.ic_shield)
             .setContentTitle(title)
             .setContentText(body)

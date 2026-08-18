@@ -1,6 +1,6 @@
-# STRIPARCO for Android
+# PS-BLOCK for Android
 
-Android port of the STRIPARCO content filter & screen-time guard. It keeps **all**
+Android port of the PS-BLOCK content filter & screen-time guard. It keeps **all**
 features of the Windows build, re-implemented with native Android mechanisms.
 
 ## Feature parity
@@ -28,7 +28,7 @@ Requires Android SDK (platform 34, build-tools 34) and JDK 17.
 
 ```bash
 cd Android
-./build.sh        # or build.bat on Windows → produces release/STRIPARCO.apk (signed)
+./build.sh        # or build.bat on Windows → produces release/PS-BLOCK.apk (signed)
 ```
 
 Manual:
@@ -38,15 +38,16 @@ gradle wrapper --gradle-version 8.7   # first time only
 ./gradlew assembleDebug               # debug APK
 ```
 
-A prebuilt **signed release APK is committed at [`release/STRIPARCO.apk`](release/STRIPARCO.apk)**
-(~1.6 MB, self-signed key in `striparco-release.keystore`). Or open `Android/` in Android Studio.
+`build.sh`/`build.bat` sign the APK with the self-signed key in `psblock-release.keystore`
+and write it to `release/PS-BLOCK.apk` (gitignored — build it locally rather than committing
+a binary). Or open `Android/` in Android Studio.
 
 ## Device owner (strong anti-tamper, optional)
 
-On a fresh device with no accounts, provision STRIPARCO as **device owner**:
+On a fresh device with no accounts, provision PS-BLOCK as **device owner**:
 
 ```bash
-adb shell dpm set-device-owner com.striparco.app/.AdminReceiver
+adb shell dpm set-device-owner com.psblock.app/.AdminReceiver
 ```
 
 As device owner the app blocks its own uninstall while a password is set, forces the filter

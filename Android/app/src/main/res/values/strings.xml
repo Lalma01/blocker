@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">STRIPARCO</string>
+    <string name="app_name">PS-BLOCK</string>
     <string name="idx_sub">Actively protects your browser from unwanted content</string>
 
     <!-- Dashboard -->
@@ -24,7 +24,7 @@
     <string name="footer_text">All filtering is local · No data is sent</string>
 
     <!-- Settings -->
-    <string name="set_title">Settings – STRIPARCO</string>
+    <string name="set_title">Settings – PS-BLOCK</string>
     <string name="set_h1">Settings</string>
     <string name="theme_h2">Appearance</string>
     <string name="theme_label">Theme:</string>
@@ -68,7 +68,7 @@
     <string name="close_btn">Close</string>
 
     <!-- Screen time -->
-    <string name="st_title">Screen Time – STRIPARCO</string>
+    <string name="st_title">Screen Time – PS-BLOCK</string>
     <string name="st_h1">Screen Time</string>
     <string name="st_sub">Daily screen time limit</string>
     <string name="ring_left">left</string>
@@ -86,8 +86,8 @@
     <!-- Blocked / notification -->
     <string name="bl_title">Content blocked</string>
     <string name="bl_h1">Content blocked</string>
-    <string name="bl_p">The requested website does not meet the STRIPARCO content policy, so access has been blocked.</string>
-    <string name="bl_shield">STRIPARCO · active protection</string>
+    <string name="bl_p">The requested website does not meet the PS-BLOCK content policy, so access has been blocked.</string>
+    <string name="bl_shield">PS-BLOCK · active protection</string>
     <string name="nt_title">CONTENT BLOCKED</string>
     <string name="nt_body">The browser opened blocked content.</string>
     <string name="nt_reason">Reason: </string>
@@ -113,9 +113,9 @@
     <string name="unit_sec_short">s</string>
 
     <!-- Permissions / admin -->
-    <string name="admin_disable_warning">STRIPARCO protection is active. Disabling this will remove tamper protection.</string>
+    <string name="admin_disable_warning">PS-BLOCK protection is active. Disabling this will remove tamper protection.</string>
     <string name="perm_accessibility_title">Enable browser monitoring</string>
-    <string name="perm_accessibility_msg">STRIPARCO needs the Accessibility service to detect and block NSFW content in your browser. Enable STRIPARCO in the next screen.</string>
+    <string name="perm_accessibility_msg">PS-BLOCK needs the Accessibility service to detect and block NSFW content in your browser. Enable PS-BLOCK in the next screen.</string>
     <string name="perm_overlay_title">Allow display over other apps</string>
     <string name="perm_overlay_msg">This permission lets the screen-time lockout and blocked notices appear on top of other apps.</string>
     <string name="perm_open">Open settings</string>

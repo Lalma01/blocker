@@ -1,4 +1,4 @@
-package com.striparco.app
+package com.psblock.app
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent

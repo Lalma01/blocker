@@ -1,4 +1,4 @@
-package com.striparco.app
+package com.psblock.app
 
 /**
  * Domain & keyword lists ported verbatim from the Windows build (main.js).
@@ -22,34 +22,41 @@ object Blocklist {
         "spicychat.ai", "crushon.ai", "janitorai.com", "candy.ai", "muah.ai",
         "dreamgf.ai", "dreambf.ai", "erogen.ai", "intimateai.com",
         "character.ai", "naughtydog.ai", "kindroid.ai", "soulgen.ai", "venus.chub.ai",
-        // NSFW AI Image generators
+        // NSFW AI Image generators — only tools explicitly built for NSFW content
+        // (undressing/deepfake apps, adult model hubs). General-purpose, mainstream
+        // image generators (Midjourney, Canva, etc.) are NOT NSFW tools and must stay
+        // reachable — see ALLOWED_DOMAINS / WHITELIST_AI_KEYWORDS below.
         "civitai.com", "pornpen.ai", "aiporncreator.ai", "nudify.online",
         "seduced.ai", "promptchan.ai", "undress.app", "deepnude.cc", "nsfwgenerator.ai",
-        "replika.com", "yodayo.com",
-        // AI Image generators (non-NSFW chatbots are intentionally NOT blocked)
-        "perchance.org", "midjourney.com", "leonardo.ai", "nightcafe.studio",
-        "lexica.art", "playgroundai.com", "craiyon.com", "stablediffusionweb.com",
-        "mage.space", "tensor.art", "runwayml.com", "ideogram.ai", "krea.ai",
-        "designer.microsoft.com"
+        "replika.com", "yodayo.com"
     )
 
-    // Mainstream AI assistants that must stay accessible (never blocked).
+    // Mainstream AI assistants and general-purpose creative tools that must stay
+    // accessible (never blocked), even though some STRONG_KEYWORDS below (if left
+    // unrestricted) could otherwise match them.
     val ALLOWED_DOMAINS = listOf(
         "grok.com", "claude.ai", "perplexity.ai", "gemini.google.com", "x.com",
         "chatgpt.com", "chat.openai.com", "openai.com", "copilot.microsoft.com",
-        "poe.com", "you.com", "pi.ai", "bard.google.com"
+        "poe.com", "you.com", "pi.ai", "bard.google.com",
+        // Mainstream, non-NSFW AI image generators / creative suites.
+        "canva.com", "perchance.org", "midjourney.com", "leonardo.ai",
+        "nightcafe.studio", "lexica.art", "playgroundai.com", "craiyon.com",
+        "stablediffusionweb.com", "mage.space", "tensor.art", "runwayml.com",
+        "ideogram.ai", "krea.ai", "designer.microsoft.com"
     )
 
-    // Strong keywords: a single match blocks.
+    // Strong keywords: a single match blocks (unambiguous porn / NSFW-AI brands & terms).
+    // Deliberately excludes generic terms like "image generator" and brand names of
+    // mainstream, non-NSFW tools (Midjourney, Canva, Leonardo, …) — those caused false
+    // positives (e.g. blocking this project's own GitHub page, or Canva's own "image
+    // generator" feature) without adding any real NSFW protection.
     val STRONG_KEYWORDS = listOf(
         "pornhub", "xvideos", "xnxx", "xhamster", "redtube", "youporn", "onlyfans",
         "chaturbate", "spankbang", "stripchat", "spicychat", "crushon", "janitorai",
         "character.ai", "nudify", "pornpen", "civitai", "nhentai", "rule34",
         "porn", "xxx", "nsfw", "hentai", "live sex", "sex chat", "adult content",
         "replika", "candy.ai", "dreamgf", "dreambf", "muah.ai", "soulgen", "kindroid",
-        "deepnude", "undress", "seduced.ai", "promptchan", "aiporncreator", "nsfwgenerator",
-        "perchance", "midjourney", "leonardo.ai", "nightcafe", "lexica.art", "playgroundai",
-        "craiyon", "mage.space", "tensor.art", "ideogram", "image generator", "képgenerátor"
+        "deepnude", "undress", "seduced.ai", "promptchan", "aiporncreator", "nsfwgenerator"
     )
 
     // Weak/ambiguous keywords: block only when at least two appear in the same title.
@@ -58,9 +65,16 @@ object Blocklist {
         "meet girls", "hot women", "escort", "sugar daddy", "megismerkedés"
     )
 
-    // Titles of these mainstream AI assistants are never blocked.
+    // Titles containing any of these are never blocked: mainstream AI assistants,
+    // mainstream image-generator brands, and reference/dev sites whose pages can
+    // legitimately mention the very words used to build the blocklists above (e.g.
+    // this project's own GitHub page/description, or a Wikipedia article about the
+    // topic) without actually being adult content.
     val WHITELIST_AI_KEYWORDS = listOf(
-        "grok", "claude", "perplexity", "gemini", "chatgpt", "copilot", "openai", "pi.ai", "you.com"
+        "grok", "claude", "perplexity", "gemini", "chatgpt", "copilot", "openai", "pi.ai", "you.com",
+        "canva", "midjourney", "leonardo.ai", "nightcafe", "lexica", "playground ai", "craiyon",
+        "stable diffusion", "mage.space", "tensor.art", "runwayml", "ideogram", "krea.ai", "perchance",
+        "github", "wikipedia", "stack overflow"
     )
 
     // ── DoH / DoT hardening ────────────────────────────────────────────────

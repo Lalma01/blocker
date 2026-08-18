@@ -1,5 +1,5 @@
 'use strict';
-// ── STRIPARCO tamper-protection core ────────────────────────────────────────
+// ── PS-BLOCK tamper-protection core ─────────────────────────────────────────
 // Pure Node module (no Electron deps) so it can run both inside the GUI process
 // and inside the SYSTEM service (electron.exe started with ELECTRON_RUN_AS_NODE=1).
 //
@@ -17,9 +17,9 @@
 const { exec, execSync } = require('child_process');
 const path = require('path');
 
-const PRODUCT       = 'STRIPARCO';
-const SERVICE_NAME  = 'STRIPARCO_Service';
-const GUARD_TASK    = 'STRIPARCO_Guard';
+const PRODUCT       = 'PS-BLOCK';
+const SERVICE_NAME  = 'PS_BLOCK_Service';
+const GUARD_TASK    = 'PS-BLOCK_Guard';
 const EVERYONE_SID  = '*S-1-1-0';
 
 const UNINSTALL_ROOTS = [
@@ -120,6 +120,11 @@ function restoreUninstall() {
 function consoleUser() {
   // Works from both the GUI process (correct env) and the SYSTEM service (queries
   // the console session owner).
+  // `wmic` is deprecated (removed entirely on newer Windows 11 builds), so the
+  // CIM/PowerShell equivalent is tried first; wmic stays as a fast path on
+  // systems that still ship it, then env vars as the final fallback.
+  const fromCim = runQ('powershell -NoProfile -NonInteractive -Command "(Get-CimInstance Win32_ComputerSystem).UserName"').trim();
+  if (fromCim) return fromCim;
   const fromWmic = runQ('wmic computersystem get username /value');
   const m = fromWmic.match(/UserName=(.+)/i);
   if (m && m[1].trim()) return m[1].trim();

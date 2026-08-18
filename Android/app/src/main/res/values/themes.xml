@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Striparco" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.PsBlock" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/accent</item>
         <item name="colorOnPrimary">@color/accent_text</item>
         <item name="colorSecondary">@color/accent</item>
@@ -13,7 +13,7 @@
     </style>
 
     <!-- Full-screen lockout: dark, immersive, no system chrome. -->
-    <style name="Theme.Striparco.Lockout" parent="Theme.Striparco">
+    <style name="Theme.PsBlock.Lockout" parent="Theme.PsBlock">
         <item name="android:windowBackground">@color/lockout_bg</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:statusBarColor">@color/lockout_bg</item>

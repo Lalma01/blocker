@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">STRIPARCO</string>
+    <string name="app_name">PS-BLOCK</string>
     <string name="idx_sub">Aktívan védi a böngészőt a nem kívánt tartalmaktól</string>
 
     <string name="lbl_status">Állapot</string>
@@ -22,7 +22,7 @@
     <string name="enable_protection">Védelem bekapcsolása</string>
     <string name="footer_text">Minden szűrés helyi · Nincs adatküldés</string>
 
-    <string name="set_title">Beállítások – STRIPARCO</string>
+    <string name="set_title">Beállítások – PS-BLOCK</string>
     <string name="set_h1">Beállítások</string>
     <string name="theme_h2">Megjelenés</string>
     <string name="theme_label">Téma:</string>
@@ -65,7 +65,7 @@
     <string name="lang_label">Felület nyelve:</string>
     <string name="close_btn">Bezárás</string>
 
-    <string name="st_title">Képernyőidő – STRIPARCO</string>
+    <string name="st_title">Képernyőidő – PS-BLOCK</string>
     <string name="st_h1">Képernyőidő</string>
     <string name="st_sub">Napi képernyőidő-korlát</string>
     <string name="ring_left">maradt</string>
@@ -82,8 +82,8 @@
 
     <string name="bl_title">Tartalom blokkolva</string>
     <string name="bl_h1">Tartalom blokkolva</string>
-    <string name="bl_p">A kért weboldal nem felel meg a STRIPARCO tartalomszűrési házirendjének, ezért a hozzáférést letiltottuk.</string>
-    <string name="bl_shield">STRIPARCO · aktív védelem</string>
+    <string name="bl_p">A kért weboldal nem felel meg a PS-BLOCK tartalomszűrési házirendjének, ezért a hozzáférést letiltottuk.</string>
+    <string name="bl_shield">PS-BLOCK · aktív védelem</string>
     <string name="nt_title">TARTALOM BLOKKOLVA</string>
     <string name="nt_body">A böngésző tiltott tartalmat nyitott meg.</string>
     <string name="nt_reason">Indok: </string>
@@ -105,9 +105,9 @@
     <string name="unit_min_short">p</string>
     <string name="unit_sec_short">mp</string>
 
-    <string name="admin_disable_warning">A STRIPARCO védelem aktív. A kikapcsolása eltávolítja a manipuláció elleni védelmet.</string>
+    <string name="admin_disable_warning">A PS-BLOCK védelem aktív. A kikapcsolása eltávolítja a manipuláció elleni védelmet.</string>
     <string name="perm_accessibility_title">Böngészőfigyelés engedélyezése</string>
-    <string name="perm_accessibility_msg">A STRIPARCO-nak szüksége van a Kisegítő lehetőségek szolgáltatásra a böngészőben megjelenő NSFW tartalom észleléséhez és blokkolásához. A következő képernyőn engedélyezd a STRIPARCO-t.</string>
+    <string name="perm_accessibility_msg">A PS-BLOCK-nak szüksége van a Kisegítő lehetőségek szolgáltatásra a böngészőben megjelenő NSFW tartalom észleléséhez és blokkolásához. A következő képernyőn engedélyezd a PS-BLOCK-t.</string>
     <string name="perm_overlay_title">Megjelenítés más alkalmazások felett</string>
     <string name="perm_overlay_msg">Ez az engedély teszi lehetővé, hogy a képernyőidő-zár és a blokkolási értesítések más alkalmazások felett jelenjenek meg.</string>
     <string name="perm_open">Beállítások megnyitása</string>

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# STRIPARCO Android – build script
+# PS-BLOCK Android – build script
 set -e
 cd "$(dirname "$0")"
 
@@ -12,5 +12,5 @@ echo "[1/2] Building release APK..."
 ./gradlew assembleRelease
 
 mkdir -p release
-cp app/build/outputs/apk/release/app-release.apk release/STRIPARCO.apk
-echo "DONE: release/STRIPARCO.apk"
+cp app/build/outputs/apk/release/app-release.apk release/PS-BLOCK.apk
+echo "DONE: release/PS-BLOCK.apk"

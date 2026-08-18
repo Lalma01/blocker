@@ -1,5 +1,5 @@
 'use strict';
-// ── STRIPARCO guard service (runs as LocalSystem) ───────────────────────────
+// ── PS-BLOCK guard service (runs as LocalSystem) ────────────────────────────
 // Launched by the Windows Service Control Manager via electron.exe started with
 // ELECTRON_RUN_AS_NODE=1 (see service_control.js). As SYSTEM it re-applies the
 // tamper protection every cycle, so removing the guard task, un-hiding the

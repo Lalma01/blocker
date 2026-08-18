@@ -1,4 +1,4 @@
-package com.striparco.app
+package com.psblock.app
 
 /**
  * Decides whether a browser window/page title should be blocked.

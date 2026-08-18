@@ -1,5 +1,5 @@
 'use strict';
-// ── STRIPARCO service installer/remover ─────────────────────────────────────
+// ── PS-BLOCK service installer/remover ──────────────────────────────────────
 // Thin wrapper around node-windows. Kept separate so the GUI process can
 // install/start/remove the LocalSystem guard service without pulling Electron
 // into the service runtime. node-windows shells out to a bundled SCM wrapper
@@ -15,7 +15,7 @@ function makeService() {
   const { Service } = require('node-windows');
   return new Service({
     name: P.SERVICE_NAME,
-    description: 'STRIPARCOP content-filter & screen-time guard (tamper protection).',
+    description: 'PS-BLOCK content-filter & screen-time guard (tamper protection).',
     script: SERVICE_SCRIPT,
     execPath: process.execPath,              // electron.exe, run as Node below
     env: [{ name: 'ELECTRON_RUN_AS_NODE', value: '1' }],
@@ -44,4 +44,24 @@ function removeService() {
   } catch (e) {}
 }
 
-module.exports = { ensureServiceInstalled, removeService };
+// Promise-based variant that actually waits for the SCM to finish stopping/
+// deleting the service (with a timeout fallback), instead of firing and
+// forgetting. Used by the uninstall/update gate, where files get deleted or
+// overwritten right after this resolves — if the SYSTEM service were still
+// mid-tick it could re-create the ACL lock/guard task in that same window.
+function removeServiceAsync(timeoutMs = 8000) {
+  return new Promise((resolve) => {
+    try {
+      const svc = makeService();
+      if (!svc.exists) { resolve(); return; }
+      let done = false;
+      const finish = () => { if (!done) { done = true; resolve(); } };
+      svc.on('uninstall', finish);
+      svc.on('error', finish);
+      setTimeout(finish, timeoutMs);
+      svc.uninstall();
+    } catch (e) { resolve(); }
+  });
+}
+
+module.exports = { ensureServiceInstalled, removeService, removeServiceAsync };

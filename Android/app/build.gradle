@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.striparco.app'
+    namespace 'com.psblock.app'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.striparco.app"
+        applicationId "com.psblock.app"
         minSdk 24
         targetSdk 34
         versionCode 11211
@@ -16,15 +16,15 @@ android {
         resourceConfigurations += ["en", "hu"]
     }
 
-    def storeFileProp = project.findProperty('STRIPARCO_STORE_FILE')
+    def storeFileProp = project.findProperty('PSBLOCK_STORE_FILE')
 
     signingConfigs {
         release {
             if (storeFileProp) {
                 storeFile rootProject.file(storeFileProp)
-                storePassword project.findProperty('STRIPARCO_STORE_PASSWORD')
-                keyAlias project.findProperty('STRIPARCO_KEY_ALIAS')
-                keyPassword project.findProperty('STRIPARCO_KEY_PASSWORD')
+                storePassword project.findProperty('PSBLOCK_STORE_PASSWORD')
+                keyAlias project.findProperty('PSBLOCK_KEY_ALIAS')
+                keyPassword project.findProperty('PSBLOCK_KEY_PASSWORD')
             }
         }
     }

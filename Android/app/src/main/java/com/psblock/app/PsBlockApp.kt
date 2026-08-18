@@ -1,4 +1,4 @@
-package com.striparco.app
+package com.psblock.app
 
 import android.app.Application
 import android.app.NotificationChannel
@@ -9,7 +9,7 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
 import java.util.Locale
 
-class StriparcoApp : Application() {
+class PsBlockApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
@@ -29,17 +29,17 @@ class StriparcoApp : Application() {
         val nm = getSystemService(NotificationManager::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             nm.createNotificationChannel(
-                NotificationChannel(CH_SERVICE, "STRIPARCO", NotificationManager.IMPORTANCE_LOW)
+                NotificationChannel(CH_SERVICE, "PS-BLOCK", NotificationManager.IMPORTANCE_LOW)
             )
             nm.createNotificationChannel(
-                NotificationChannel(CH_ALERT, "STRIPARCO", NotificationManager.IMPORTANCE_HIGH)
+                NotificationChannel(CH_ALERT, "PS-BLOCK", NotificationManager.IMPORTANCE_HIGH)
             )
         }
     }
 
     companion object {
-        const val CH_SERVICE = "striparco_service"
-        const val CH_ALERT = "striparco_alert"
+        const val CH_SERVICE = "psblock_service"
+        const val CH_ALERT = "psblock_alert"
 
         fun applyTheme(theme: String) {
             AppCompatDelegate.setDefaultNightMode(

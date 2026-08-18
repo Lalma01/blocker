@@ -1,4 +1,4 @@
-package com.striparco.app
+package com.psblock.app
 
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
@@ -11,7 +11,7 @@ import android.os.UserManager
  *
  * - As a plain **device admin**, uninstalling requires deactivating the admin first (friction).
  * - As a **device owner** (provisioned via `adb shell dpm set-device-owner
- *   com.striparco.app/.AdminReceiver` on a fresh device), STRIPARCO can:
+ *   com.psblock.app/.AdminReceiver` on a fresh device), PS-BLOCK can:
  *     • block its own uninstall outright while a password is set,
  *     • force its filtering VPN to be always-on (no consent prompt, auto-restart),
  *     • lock Private DNS to opportunistic so the user can't route lookups through an

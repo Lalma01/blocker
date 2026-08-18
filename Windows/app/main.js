@@ -5,12 +5,21 @@ const fs   = require('fs');
 const crypto = require('crypto');
 const { exec, spawn } = require('child_process');
 const P = require('./protection');
-const { ensureServiceInstalled, removeService } = require('./service_control');
+const { ensureServiceInstalled, removeServiceAsync } = require('./service_control');
+
+// Fixes the userData folder to %APPDATA%\PS-BLOCK regardless of how the app is
+// launched (dev "npm start" vs. the packaged build) — both this file and the
+// installer/uninstaller's uninstall_gate.js must agree on the same path.
+app.setName('PS-BLOCK');
 
 // ── Paths ──────────────────────────────────────────────────────────────────
 const HOSTS_FILE    = 'C:\\Windows\\System32\\drivers\\etc\\hosts';
-const MARKER_START  = '# === STRIPARCO START ===';
-const MARKER_END    = '# === STRIPARCO END ===';
+const MARKER_START  = '# === PS-BLOCK START ===';
+const MARKER_END    = '# === PS-BLOCK END ===';
+// Legacy markers from the STRIPARCO/STRIPARCOP name, cleaned up once on
+// upgrade so a rebrand doesn't leave an orphaned, unmanaged hosts-file block.
+const LEGACY_MARKER_START = '# === STRIPARCO START ===';
+const LEGACY_MARKER_END   = '# === STRIPARCO END ===';
 const CONFIG_PATH   = path.join(app.getPath('userData'), 'config.json');
 const PRELOAD       = path.join(__dirname, 'preload.js');
 const BLOCKED_HTML_PATH = path.join(app.getPath('userData'), 'blocked.html');
@@ -35,25 +44,34 @@ const BUILTIN_DOMAINS = [
   'spicychat.ai','crushon.ai','janitorai.com','candy.ai','muah.ai',
   'dreamgf.ai','dreambf.ai','erogen.ai','intimateai.com',
   'character.ai','naughtydog.ai','kindroid.ai','soulgen.ai','venus.chub.ai',
-  // NSFW AI Image generators
+  // NSFW AI Image generators — only tools that are explicitly built for NSFW
+  // content (undressing/deepfake apps, adult model hubs). General-purpose,
+  // mainstream image generators (Midjourney, Canva, etc.) are NOT NSFW tools
+  // and must stay reachable — see ALLOWED_DOMAINS / evaluateTitle below.
   'civitai.com','pornpen.ai','aiporncreator.ai','nudify.online',
   'seduced.ai','promptchan.ai','undress.app','deepnude.cc','nsfwgenerator.ai',
   'replika.com','yodayo.com',
-  // AI Image generators (non-NSFW chatbots are intentionally NOT blocked)
-  'perchance.org', 'midjourney.com', 'leonardo.ai', 'nightcafe.studio',
-  'lexica.art', 'playgroundai.com', 'craiyon.com', 'stablediffusionweb.com',
-  'mage.space', 'tensor.art', 'runwayml.com', 'ideogram.ai', 'krea.ai',
-  'designer.microsoft.com',
 ];
 
-// Mainstream AI assistants that must stay accessible (never blocked / never written to hosts).
+// Mainstream AI assistants and general-purpose creative tools that must stay
+// accessible (never blocked / never written to hosts), even though some of the
+// generic keywords below (e.g. "image generator") could otherwise match them.
 const ALLOWED_DOMAINS = [
   'grok.com', 'claude.ai', 'perplexity.ai', 'gemini.google.com', 'x.com',
   'chatgpt.com', 'chat.openai.com', 'openai.com', 'copilot.microsoft.com',
   'poe.com', 'you.com', 'pi.ai', 'bard.google.com',
+  // Mainstream, non-NSFW AI image generators / creative suites.
+  'canva.com', 'perchance.org', 'midjourney.com', 'leonardo.ai',
+  'nightcafe.studio', 'lexica.art', 'playgroundai.com', 'craiyon.com',
+  'stablediffusionweb.com', 'mage.space', 'tensor.art', 'runwayml.com',
+  'ideogram.ai', 'krea.ai', 'designer.microsoft.com',
 ];
 
-// Strong keywords: a single match blocks (unambiguous porn / NSFW-AI / image-generator brands & terms).
+// Strong keywords: a single match blocks (unambiguous porn / NSFW-AI brands & terms).
+// Deliberately excludes generic terms like "image generator" and brand names of
+// mainstream, non-NSFW tools (Midjourney, Canva, Leonardo, …) — those caused
+// false positives (e.g. blocking this very project's GitHub page, or Canva's
+// own "image generator" feature) without adding any real NSFW protection.
 const STRONG_KEYWORDS = [
   'pornhub','xvideos','xnxx','xhamster','redtube','youporn','onlyfans',
   'chaturbate','spankbang','stripchat','spicychat','crushon','janitorai',
@@ -61,8 +79,6 @@ const STRONG_KEYWORDS = [
   'porn','xxx','nsfw','hentai','live sex','sex chat','adult content',
   'replika','candy.ai','dreamgf','dreambf','muah.ai','soulgen','kindroid',
   'deepnude','undress','seduced.ai','promptchan','aiporncreator','nsfwgenerator',
-  'perchance','midjourney','leonardo.ai','nightcafe','lexica.art','playgroundai',
-  'craiyon','mage.space','tensor.art','ideogram','image generator','képgenerátor'
 ];
 
 // Weak/ambiguous keywords: block only when at least two of them appear in the same title.
@@ -71,13 +87,22 @@ const WEAK_KEYWORDS = [
   'meet girls','hot women','escort','sugar daddy','megismerkedés'
 ];
 
-// Titles of these mainstream AI assistants are never blocked.
-const WHITELIST_AI_KEYWORDS = ['grok', 'claude', 'perplexity', 'gemini', 'chatgpt', 'copilot', 'openai', 'pi.ai', 'you.com'];
+// Titles containing any of these are never blocked: mainstream AI assistants,
+// mainstream image-generator brands, and reference/dev sites whose pages can
+// legitimately mention the very words used to build the blocklists above
+// (e.g. this project's own GitHub page/description, or a Wikipedia article
+// about the topic) without actually being adult content.
+const WHITELIST_TITLE_KEYWORDS = [
+  'grok', 'claude', 'perplexity', 'gemini', 'chatgpt', 'copilot', 'openai', 'pi.ai', 'you.com',
+  'canva', 'midjourney', 'leonardo.ai', 'nightcafe', 'lexica', 'playground ai', 'craiyon',
+  'stable diffusion', 'mage.space', 'tensor.art', 'runwayml', 'ideogram', 'krea.ai', 'perchance',
+  'github', 'wikipedia', 'stack overflow',
+];
 
 // ── Main-process translations ──────────────────────────────────────────────
 const MSG = {
   hu: {
-    tray_open: 'STRIPARCOP megnyitása', tray_screentime: 'Képernyőidő',
+    tray_open: 'PS-BLOCK megnyitása', tray_screentime: 'Képernyőidő',
     tray_settings: 'Beállítások', tray_exit: 'Kilépés',
     tray_unlimited: 'Korlátlan', tray_left: 'maradt',
     notif_time_title: 'Képernyőidő',
@@ -91,7 +116,7 @@ const MSG = {
     u_h: 'ó', u_m: 'p', u_s: 'mp', dur_h: 'óra', dur_m: 'perc',
   },
   en: {
-    tray_open: 'Open STRIPARCOP', tray_screentime: 'Screen Time',
+    tray_open: 'Open PS-BLOCK', tray_screentime: 'Screen Time',
     tray_settings: 'Settings', tray_exit: 'Exit',
     tray_unlimited: 'Unlimited', tray_left: 'left',
     notif_time_title: 'Screen Time',
@@ -175,11 +200,18 @@ function saveConfig() {
 }
 
 // ── Hosts file ─────────────────────────────────────────────────────────────
+// Strips both the current and the legacy (pre-rebrand) marker blocks, so an
+// upgrade from STRIPARCO/STRIPARCOP doesn't leave an orphaned, unmanaged block.
+function stripMarkedBlocks(text) {
+  const rx = new RegExp(`\\r?\\n?${escRx(MARKER_START)}[\\s\\S]*?${escRx(MARKER_END)}\\r?\\n?`,'g');
+  const legacyRx = new RegExp(`\\r?\\n?${escRx(LEGACY_MARKER_START)}[\\s\\S]*?${escRx(LEGACY_MARKER_END)}\\r?\\n?`,'g');
+  return text.replace(rx,'').replace(legacyRx,'');
+}
+
 function updateHosts() {
   let content;
   try { content = fs.readFileSync(HOSTS_FILE,'utf8'); } catch { return false; }
-  const rx = new RegExp(`\\r?\\n?${escRx(MARKER_START)}[\\s\\S]*?${escRx(MARKER_END)}\\r?\\n?`,'g');
-  let clean = content.replace(rx,'');
+  let clean = stripMarkedBlocks(content);
   const allowed = new Set(ALLOWED_DOMAINS);
   const all = [...new Set([...BUILTIN_DOMAINS, ...config.custom_blocked_sites])]
     .filter(d => !allowed.has(d) && !ALLOWED_DOMAINS.some(a => d === a || d.endsWith('.' + a)));
@@ -200,8 +232,7 @@ function updateHosts() {
 function cleanHosts() {
   try {
     const c = fs.readFileSync(HOSTS_FILE,'utf8');
-    const rx = new RegExp(`\\r?\\n?${escRx(MARKER_START)}[\\s\\S]*?${escRx(MARKER_END)}\\r?\\n?`,'g');
-    fs.writeFileSync(HOSTS_FILE, c.replace(rx,''),'utf8');
+    fs.writeFileSync(HOSTS_FILE, stripMarkedBlocks(c),'utf8');
   } catch {}
 }
 
@@ -229,9 +260,11 @@ function hardenPersistence() {
 
 // Sanctioned teardown — only reached through the password-protected exit (doExit).
 // Removes every protection vector so the owner can fully remove the app afterwards.
-function disableProtection() {
-  removeService();
-  P.removeProtection();
+// Actually waits for the guard service to stop (instead of firing and forgetting)
+// so a still-ticking SYSTEM service can't re-apply protection right after this returns.
+async function disableProtection() {
+  await removeServiceAsync();
+  await P.removeProtection();
 }
 
 function preventUninstallation() {
@@ -252,8 +285,9 @@ function titleMatches(kw, title, lo) {
 // Returns the matched reason string if the title should be blocked, otherwise null.
 function evaluateTitle(title) {
   const lo = title.toLowerCase();
-  // Never block mainstream AI assistants (Claude, Gemini, ChatGPT, Grok, Perplexity, Copilot…).
-  for (const w of WHITELIST_AI_KEYWORDS) if (lo.includes(w)) return null;
+  // Never block mainstream AI assistants / image generators / reference sites
+  // (Claude, Gemini, ChatGPT, Grok, Perplexity, Copilot, Canva, Midjourney, GitHub…).
+  for (const w of WHITELIST_TITLE_KEYWORDS) if (lo.includes(w)) return null;
   // User-defined custom sites are treated as strong (single match blocks).
   const strong = [...STRONG_KEYWORDS, ...config.custom_blocked_sites.map(s => s.toLowerCase())];
   for (const kw of strong) if (titleMatches(kw, title, lo)) return kw;
@@ -388,7 +422,7 @@ function updateTray() {
   if (!tray || tray.isDestroyed()) return;
   const rem = getRemaining();
   const timeStr = rem < 0 ? tr('tray_unlimited') : fmtTime(rem) + ' ' + tr('tray_left');
-  tray.setToolTip(`STRIPARCOP  ·  ${timeStr}`);
+  tray.setToolTip(`PS-BLOCK  ·  ${timeStr}`);
 }
 
 // True when time should not be counted: explicit pause (lock/suspend) or system idle
@@ -661,7 +695,7 @@ function openScreenTimeWindow() {
 function createTray() {
   const iconPath = path.join(__dirname, '..', 'assets', 'icons', 'win', 'icon.ico');
   tray = new Tray(iconPath);
-  tray.setToolTip('STRIPARCOP');
+  tray.setToolTip('PS-BLOCK');
   tray.on('click', openMainWindow);
   buildTrayMenu();
 }
@@ -691,17 +725,18 @@ async function protectExit() {
   exitWindow.on('closed', () => { exitWindow = null; });
 }
 
-function doExit() {
+async function doExit() {
   app.isQuitting = true;
   stopLockoutEnforcer();
+  cleanHosts();
   // Tear down every protection vector so the sanctioned (password-protected) exit
   // genuinely stops the app instead of being resurrected by the guard task/service.
-  disableProtection();
-  cleanHosts();
-  // The guard service re-applies protection every ~20 s, so once its uninstall has
-  // had time to complete, tear the protection down once more (clearing anything it
-  // may have re-created) and only then quit.
-  setTimeout(() => { P.removeProtection(); setTimeout(() => app.quit(), 800); }, 2500);
+  // Awaited (removeServiceAsync only resolves once the SCM confirms the service is
+  // gone), then re-applied once more to clear anything from one last in-flight tick.
+  await disableProtection();
+  await new Promise(r => setTimeout(r, 1000));
+  await P.removeProtection();
+  app.quit();
 }
 
 ipcMain.on('confirmed-exit', () => doExit());

@@ -1,4 +1,4 @@
-package com.striparco.app
+package com.psblock.app
 
 import android.app.admin.DeviceAdminReceiver
 import android.content.Context
@@ -7,7 +7,7 @@ import android.content.Intent
 /**
  * Device-admin / device-owner receiver. Acts as the admin component for anti-tamper:
  * see [DevicePolicy]. Provision as device owner with:
- *   adb shell dpm set-device-owner com.striparco.app/.AdminReceiver
+ *   adb shell dpm set-device-owner com.psblock.app/.AdminReceiver
  */
 class AdminReceiver : DeviceAdminReceiver() {
 

@@ -2,16 +2,27 @@
 <html lang="hu">
 <head>
   <meta charset="UTF-8">
-  <title>STRIPARCOP</title>
+  <title>PS-BLOCK</title>
   <link rel="stylesheet" href="theme.css">
   <style>
     body.centered { padding-top: 36px; }
     .logo { font-size: 1.6rem; }
+    .lang-switch { position: fixed; top: 14px; right: 16px; display: flex; gap: 6px; }
+    .lang-btn {
+      width: 34px; height: 28px; padding: 0; font-size: 1.05rem; line-height: 1;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      cursor: pointer; opacity: 0.55; transition: opacity 0.12s, border-color 0.12s;
+    }
+    .lang-btn:hover { opacity: 0.85; }
+    .lang-btn.active { opacity: 1; border-color: var(--accent); }
   </style>
 </head>
 <body class="centered">
-  <h1><span class="brand">STRIPARCOP</span></h1>
-  <p style="color:var(--muted);font-size:.72rem;letter-spacing:.08em;margin:-2px 0 8px;text-transform:uppercase">Strict Parental Control Program</p>
+  <div class="lang-switch" id="langSwitch">
+    <button type="button" class="lang-btn" id="langHu" data-lang="hu" title="Magyar">🇭🇺</button>
+    <button type="button" class="lang-btn" id="langEn" data-lang="en" title="English">🇬🇧</button>
+  </div>
+  <h1><span class="brand">PS-BLOCK</span></h1>
   <p class="subtitle" data-i18n="idx_sub">Aktívan védi a böngészőt a nem kívánt tartalmaktól</p>
 
   <div class="grid">
@@ -46,13 +57,25 @@
     <button class="btn btn-secondary" id="screenTimeBtn" data-i18n="btn_screentime">Képernyőidő</button>
   </div>
 
-  <div class="footer">STRIPARCOP v<span id="appVersion">…</span> · <span data-i18n="footer_text">Minden szűrés helyi · Nincs adatküldés</span></div>
+  <div class="footer">PS-BLOCK v<span id="appVersion">…</span> · <span data-i18n="footer_text">Minden szűrés helyi · Nincs adatküldés</span></div>
 
   <script src="i18n.js"></script>
   <script>
+    function updateLangButtons(lang) {
+      document.getElementById('langHu').classList.toggle('active', lang !== 'en');
+      document.getElementById('langEn').classList.toggle('active', lang === 'en');
+    }
+    document.getElementById('langSwitch').addEventListener('click', async (e) => {
+      const btn = e.target.closest('.lang-btn');
+      if (!btn) return;
+      const lang = btn.dataset.lang;
+      window.setLang(lang); window.applyI18n(); updateLangButtons(lang);
+      await window.api.saveConfig({ lang });
+    });
+
     async function load() {
       const cfg = await window.api.getConfig();
-      window.setLang(cfg.lang); window.applyI18n();
+      window.setLang(cfg.lang); window.applyI18n(); updateLangButtons(cfg.lang);
       const ver = await window.api.getVersion();
       document.getElementById('appVersion').textContent = ver;
       document.getElementById('blockedCount').textContent = cfg.blocked_count || 0;

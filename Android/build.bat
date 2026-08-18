@@ -1,7 +1,7 @@
 @echo off
-REM STRIPARCO Android – build script
+REM PS-BLOCK Android – build script
 echo ============================================
-echo  STRIPARCO Android – APK keszitese
+echo  PS-BLOCK Android – APK keszitese
 echo ============================================
 echo.
 
@@ -15,10 +15,10 @@ call gradlew.bat assembleRelease
 if %errorlevel% neq 0 ( echo HIBA: build sikertelen! & pause & exit /b 1 )
 
 if not exist release mkdir release
-copy /Y app\build\outputs\apk\release\app-release.apk release\STRIPARCO.apk >nul
+copy /Y app\build\outputs\apk\release\app-release.apk release\PS-BLOCK.apk >nul
 
 echo.
 echo ============================================
-echo  KESZ! APK: release\STRIPARCO.apk
+echo  KESZ! APK: release\PS-BLOCK.apk
 echo ============================================
 pause

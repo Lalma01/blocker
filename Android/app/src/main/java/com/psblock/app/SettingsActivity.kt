@@ -1,4 +1,4 @@
-package com.striparco.app
+package com.psblock.app
 
 import android.app.admin.DevicePolicyManager
 import android.content.Intent
@@ -70,7 +70,7 @@ class SettingsActivity : AppCompatActivity() {
         sp.setSelection(when (Config.theme) { "light" -> 1; "dark" -> 2; else -> 0 })
         sp.onItemSelected { pos ->
             val v = when (pos) { 1 -> "light"; 2 -> "dark"; else -> "system" }
-            if (v != Config.theme) { Config.theme = v; StriparcoApp.applyTheme(v); recreate() }
+            if (v != Config.theme) { Config.theme = v; PsBlockApp.applyTheme(v); recreate() }
         }
     }
 

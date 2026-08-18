@@ -1,4 +1,4 @@
-package com.striparco.app
+package com.psblock.app
 
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -103,7 +103,7 @@ class ScreenTimeService : android.app.Service() {
     private fun persist() { /* usedSeconds is already written through on each change */ }
 
     private fun buildNotification() =
-        NotificationCompat.Builder(this, StriparcoApp.CH_SERVICE)
+        NotificationCompat.Builder(this, PsBlockApp.CH_SERVICE)
             .setContentTitle(getString(R.string.app_name))
             .setContentText(tooltip())
             .setSmallIcon(R.drawable.ic_shield)

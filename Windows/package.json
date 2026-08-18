@@ -1,16 +1,16 @@
 {
-  "name": "striparco",
+  "name": "ps-block",
   "version": "1.12.22",
-  "description": "STRIPARCOP (Strict Parental Control Program) – Windows NSFW / NSFW-AI content filter & screen time guard",
-  "author": "STRIPARCOP",
+  "description": "PS-BLOCK – Windows content filter and screen-time guard for adult websites and AI companion apps",
+  "author": "PS-BLOCK",
   "main": "app/main.js",
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder --win --ia32 --x64"
   },
   "build": {
-    "appId": "com.striparco.app",
-    "productName": "STRIPARCOP",
+    "appId": "com.psblock.app",
+    "productName": "PS-BLOCK",
     "asar": false,
     "directories": {
       "buildResources": "assets",

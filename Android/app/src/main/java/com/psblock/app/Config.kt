@@ -1,4 +1,4 @@
-package com.striparco.app
+package com.psblock.app
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -13,7 +13,7 @@ import java.util.Locale
  * auto-start and the custom blocklist.
  */
 object Config {
-    private const val PREFS = "striparco_config"
+    private const val PREFS = "psblock_config"
 
     private const val K_PW_PROTECTED = "password_protected"
     private const val K_PW_HASH = "password_hash"

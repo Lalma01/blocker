@@ -1,4 +1,4 @@
-/* STRIPARCO — shared UI theme.
+/* PS-BLOCK — shared UI theme.
    One stylesheet for every window so all surfaces, inputs and controls match.
    Colours follow the OS light/dark preference automatically (prefers-color-scheme);
    the main process can force a scheme via nativeTheme when the user picks one manually. */

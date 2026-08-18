@@ -1,23 +1,24 @@
-# STRIPARCOP — Technical Documentation
+# PS-BLOCK — Technical Documentation
 
-*STRIPARCOP = Strict Parental Control Program*
+*Local content filter & screen-time guard*
 
-*Magyar dokumentáció a [második részben](#striparco--magyar-dokumentáció).*
+*Magyar dokumentáció a [második részben](#ps-block--magyar-dokumentáció).*
 
 ---
 
 ## 1. Overview
 
-**STRIPARCO** is a Windows desktop application (built on Electron) that combines a local
+**PS-BLOCK** is a Windows desktop application (built on Electron) that combines a local
 content filter with a screen-time guard. It is designed for self-control and parental-style
 use on a single machine. Everything runs locally; the program never sends data to any
 external server.
 
 Two protections work together:
 
-1. **Content filtering** — blocks adult ("NSFW") websites and NSFW-AI companion / image
+1. **Content filtering** — blocks adult websites and NSFW-branded AI companion / image
    generator sites, while leaving mainstream AI assistants (ChatGPT, Claude, Gemini, Grok,
-   Perplexity, Copilot, etc.) accessible.
+   Perplexity, Copilot, etc.) and general-purpose, non-NSFW creative tools (Midjourney,
+   Canva, Leonardo.ai, etc.) accessible.
 2. **Screen-time guard** — enforces a configurable daily time budget. When the budget is
    spent, the machine is locked down until time is added with the password.
 
@@ -30,16 +31,16 @@ Two protections work together:
 
 | Area | Behaviour |
 |------|-----------|
-| **Website blocking** | The Windows `hosts` file redirects known adult / NSFW-AI domains to `127.0.0.1`. The list is self-repaired every 5 minutes. |
+| **Website blocking** | The Windows `hosts` file redirects known adult / NSFW-branded AI domains to `127.0.0.1`. The list is self-repaired every 5 minutes. |
 | **Browser-title monitor** | A background PowerShell loop reports browser window titles ~once per second. Matching titles trigger a redirect to the local block page plus an on-screen notice. The redirect **preserves and restores the user's clipboard**. |
-| **Keyword tiers** | *Strong* keywords block on a single match. *Weak / ambiguous* keywords (e.g. "dating", "escort") only block when at least two appear in the same title — reducing false positives. |
-| **AI allow-list** | Mainstream AI assistant domains and titles are never blocked. |
+| **Keyword tiers** | *Strong* keywords block on a single match — restricted to unambiguous porn/NSFW-AI brands and terms, never generic phrases like "image generator" (that used to false-positive on Canva and on this project's own GitHub page). *Weak / ambiguous* keywords (e.g. "dating", "escort") only block when at least two appear in the same title — reducing false positives. |
+| **Allow-list** | Mainstream AI assistant domains/titles (ChatGPT, Claude, Gemini, Grok, Perplexity, Copilot, …) and mainstream, non-NSFW creative tools (Midjourney, Canva, Leonardo.ai, Nightcafe, Lexica, Playground AI, Craiyon, …) are never blocked — as domains and by title. Reference/dev-site titles (GitHub, Wikipedia, Stack Overflow) are exempt too, so a page merely *describing* the filter's own keywords never trips it. |
 | **Screen-time limit** | A daily limit in minutes (0 = unlimited). Warnings appear **once** at 15, 5 and 1 minute(s) remaining; they re-arm after time is added. |
 | **Lock-out** | When time runs out, all browsers are closed and a full-screen kiosk window covers every display. Only the password prompt (to add time) is usable. |
 | **Password-protected settings** | When a password is set, the **main process** (not just the UI) requires it to change the screen-time limit, auto-start or the custom blocklist, and to add time or exit. **Theme and language stay changeable without the password** (cosmetic, safe). |
 | **Theme** | Follows the Windows light/dark setting automatically; can be forced to Light or Dark in Settings. |
-| **Bilingual UI** | English / Hungarian, auto-detected on first run, switchable in Settings. |
-| **Persistence (anti-uninstall)** | Always-on, with one strong core + one light backup (no kernel driver — that would need EV + MS-attestation signing). **(a) LocalSystem guard service** — boot-started, auto-restarting; as SYSTEM it re-applies the tamper protection every ~20 s. **(b) Per-minute guard task** (pinned to the console user, interactive) — relaunches the GUI within ~60 s of any kill. Protection = NTFS **ACL lock** on the install dir (files can't be deleted) + the Control Panel/Settings uninstall entry **hidden on the real key** (matched by DisplayName, `SystemComponent`+`NoRemove`/`NoModify`). Note: while locked, installer-based updates require the password **Exit** first (which removes the service, ACL lock, uninstall-hide and guard task). |
+| **Bilingual UI** | English / Hungarian, auto-detected on first run (from the Windows display language), switchable any time with the flag picker on the main screen or in Settings; the choice is remembered. |
+| **Persistence (anti-uninstall)** | Always-on, with one strong core + one light backup (no kernel driver — that would need EV + MS-attestation signing). **(a) LocalSystem guard service** — boot-started, auto-restarting; as SYSTEM it re-applies the tamper protection every ~20 s. **(b) Per-minute guard task** (pinned to the console user, interactive) — relaunches the GUI within ~60 s of any kill. Protection = NTFS **ACL lock** on the install dir (files can't be deleted) + the Control Panel/Settings uninstall entry **hidden on the real key** (matched by DisplayName, `SystemComponent`+`NoRemove`/`NoModify`). **Unlike the file/registry lock, this is also enforced at the installer/uninstaller level**: running the uninstaller directly (bypassing the hidden Control Panel entry) or re-running the installer to "update" no longer silently strips protection — both now ask for the app's own password (via `uninstall_gate.js`, the same SHA-256 check the app itself uses) before touching a single file, and abort outright after 3 wrong attempts or a Cancel. |
 | **Privacy** | No telemetry, no network calls, no logging of browsing to disk beyond a local block counter. |
 
 ---
@@ -91,16 +92,22 @@ Windows/
 │   ├── protection.js    Tamper-protection core (ACL lock, uninstall-hide, guard task)
 │   ├── service.js       LocalSystem guard service body (re-applies protection.js)
 │   ├── service_control.js  Installs/removes the guard service (node-windows)
+│   ├── uninstall_gate.js  Password gate called by the NSIS installer/uninstaller before
+│   │                      any protection teardown (see §2/§9) — same SHA-256 check as the app
 │   ├── i18n.js          Renderer translations (EN / HU)
 │   ├── theme.css        Single shared stylesheet for every window (auto light/dark)
-│   ├── index.html       Dashboard
+│   ├── index.html       Dashboard (incl. the HU/EN flag language switcher)
 │   ├── settings.html    Settings (theme, language, password, time limit, auto-start, blocklist)
 │   ├── screentime.html  Screen-time ring + add-time / lock-out screen
 │   ├── blocked.html     Local block page shown in the browser
 │   ├── notification.html Toast shown when a title is blocked
 │   ├── exit.html        Password prompt for exiting
 │   └── version_bump.js  Sets version to <major>.<minor>.<git-commit-count> at build time
-├── assets/              Application icons (png + win/icon.ico)
+├── assets/
+│   ├── icons/           Application icons (png + win/icon.ico)
+│   ├── installer.nsh    Custom NSIS hooks — the install/uninstall password gate
+│   ├── pw_prompt.ps1    Masked password dialog shown by the gate (HU/EN auto-localized)
+│   └── psblock_gate.bat Runs uninstall_gate.js "as Node" for the gate's nsExec calls
 ├── build.bat            One-click build script
 ├── package.json         App + electron-builder configuration
 └── package-lock.json
@@ -124,7 +131,7 @@ so the renderer's `prefers-color-scheme` reflects the chosen value live, without
 Settings are stored in:
 
 ```
-%APPDATA%\STRIPARCO\config.json
+%APPDATA%\PS-BLOCK\config.json
 ```
 
 | Key | Meaning |
@@ -160,7 +167,7 @@ build.bat
 
 `build.bat` runs `npm install`, bumps the version (`version_bump.js`), checks the icon, and
 runs `npm run dist` (electron-builder, NSIS, x64 + ia32). The installer is written to
-`Windows/dist/STRIPARCO Setup <version>.exe`.
+`Windows/dist/PS-BLOCK Setup <version>.exe`.
 
 The installer requests administrator rights, which are required to edit the `hosts` file.
 
@@ -182,26 +189,28 @@ The installer requests administrator rights, which are required to edit the `hos
 | Sites are not blocked | The app needs administrator rights to write the `hosts` file. Reinstall / run elevated. |
 | A blocked title still shows briefly | The redirect needs the browser window in focus; it retries on the next monitor tick (~1 s). |
 | App reopens after closing | Expected: the guard task/service restarts it. Use tray → Exit (with password) to stop it permanently. |
-| Cannot uninstall from Settings / Control Panel | Expected: the entry is hidden and the install dir is ACL-locked while protection is on. Use tray → Exit (with password) first, which removes the service, ACL lock and uninstall-hide; then uninstall normally. |
+| Cannot uninstall from Settings / Control Panel | Expected: the entry is hidden while protection is on. Either use tray → Exit (with password) first, or find the uninstaller directly (in the install folder) and run it — it will itself ask for the password before removing anything (see §9 below). |
+| Installer/uninstaller asks for a password | Expected when password protection is on: this is the anti-bypass gate (§2), not a bug. Enter the app's own password; after 3 wrong attempts or Cancel, nothing is touched and the install/update/uninstall is aborted. |
 | Theme does not match Windows | Set theme to **System** in Settings, or pick Light/Dark manually. |
 
 ---
 ---
 
-# STRIPARCO — Magyar dokumentáció
+# PS-BLOCK — Magyar dokumentáció
 
 ## 1. Áttekintés
 
-A **STRIPARCO** egy Windows asztali alkalmazás (Electron alapokon), amely egy helyi
+A **PS-BLOCK** egy Windows asztali alkalmazás (Electron alapokon), amely egy helyi
 tartalomszűrőt és egy képernyőidő-felügyelőt egyesít. Önkontrollra és szülői felügyelet
 jellegű használatra készült egyetlen gépen. Minden helyben fut; a program soha nem küld
 adatot külső szerverre.
 
 Két védelem dolgozik együtt:
 
-1. **Tartalomszűrés** — tiltja a felnőtt ("NSFW") oldalakat és az NSFW-AI „barátnő” /
+1. **Tartalomszűrés** — tiltja a felnőtt oldalakat és az NSFW-jellegű AI „barátnő” /
    képgenerátor oldalakat, miközben a bevett AI asszisztensek (ChatGPT, Claude, Gemini,
-   Grok, Perplexity, Copilot stb.) elérhetők maradnak.
+   Grok, Perplexity, Copilot stb.) és az általános célú, nem-NSFW kreatív eszközök
+   (Midjourney, Canva, Leonardo.ai stb.) elérhetők maradnak.
 2. **Képernyőidő-felügyelet** — beállítható napi időkeretet tart be. Ha az időkeret
    elfogy, a gép zárolódik, amíg jelszóval időt nem adunk hozzá.
 
@@ -214,16 +223,16 @@ Két védelem dolgozik együtt:
 
 | Terület | Működés |
 |---------|---------|
-| **Weboldal-tiltás** | A Windows `hosts` fájl a felnőtt / NSFW-AI domaineket a `127.0.0.1`-re irányítja. A lista 5 percenként önjavul. |
+| **Weboldal-tiltás** | A Windows `hosts` fájl a felnőtt / NSFW-jellegű AI domaineket a `127.0.0.1`-re irányítja. A lista 5 percenként önjavul. |
 | **Böngésző-cím figyelés** | Egy háttérben futó PowerShell ciklus kb. másodpercenként jelenti a böngészők címsorát. A talált címek átirányítást és figyelmeztető buborékot váltanak ki. Az átirányítás **megőrzi és visszaállítja a felhasználó vágólapját**. |
-| **Kulcsszó-szintek** | Az *erős* kulcsszavak egyetlen találatra is blokkolnak. A *gyenge / kétértelmű* szavak (pl. „dating”, „escort”) csak akkor, ha legalább kettő szerepel együtt — így kevesebb a téves találat. |
-| **AI engedélyező lista** | A bevett AI asszisztensek domainjei és címei soha nincsenek tiltva. |
+| **Kulcsszó-szintek** | Az *erős* kulcsszavak egyetlen találatra is blokkolnak — csak egyértelmű porn/NSFW-AI márkanevekre és kifejezésekre szűkítve, sosem olyan általános kifejezésekre, mint az „image generator” (ez korábban tévesen letiltotta a Canvát és a projekt saját GitHub-oldalát is). A *gyenge / kétértelmű* szavak (pl. „dating”, „escort”) csak akkor, ha legalább kettő szerepel együtt — így kevesebb a téves találat. |
+| **Engedélyező lista** | A bevett AI asszisztensek (ChatGPT, Claude, Gemini, Grok, Perplexity, Copilot stb.) és az általános célú, nem-NSFW kreatív eszközök (Midjourney, Canva, Leonardo.ai, Nightcafe, Lexica, Playground AI, Craiyon stb.) domainjei és címei soha nincsenek tiltva. A referencia-/fejlesztői oldalak (GitHub, Wikipedia, Stack Overflow) címei is kivételt kapnak, így egy oldal, ami csupán *leírja* a szűrő saját kulcsszavait, sosem váltja ki azt. |
 | **Képernyőidő-korlát** | Napi limit percben (0 = korlátlan). Figyelmeztetés **egyszer** 15, 5 és 1 perc maradéknál; idő hozzáadása után újra élesednek. |
 | **Zárolás** | Az idő lejártakor minden böngésző bezárul, és egy teljes képernyős kiosk ablak takar minden kijelzőt. Csak a jelszó megadása (idő hozzáadása) használható. |
 | **Jelszóvédett beállítások** | Ha van jelszó, a **fő folyamat** (nem csak a felület) megköveteli azt a képernyőidő-korlát, az automatikus indítás és az egyéni tiltólista módosításához, valamint idő hozzáadásához és kilépéshez. A **téma és a nyelv jelszó nélkül is módosítható** (kozmetikai, biztonságos). |
 | **Téma** | Automatikusan követi a Windows világos/sötét beállítását; a Beállításokban kézzel Világosra vagy Sötétre is állítható. |
-| **Kétnyelvű felület** | Magyar / angol, első indításkor automatikus felismeréssel, a Beállításokban váltható. |
-| **Védelem (eltávolítás elleni)** | Mindig aktív, egy erős mag + egy könnyű tartalék (kernel-driver nélkül – az EV + Microsoft attestation-aláírást igényelne). **(a) LocalSystem guard-szolgáltatás** – boot-időben indul, automatikusan újraindul; SYSTEM-ként ~20 mp-enként újra-alkalmazza a védelmet. **(b) Percenkénti guard feladat** (a konzol-felhasználóhoz kötve, interaktívan) – bármilyen leállítás után ~60 mp-en belül visszahozza a GUI-t. A védelem: NTFS **ACL-zár** a telepítőmappán (a fájlok nem törölhetők) + a Vezérlőpult/Gépház eltávolító bejegyzésének **elrejtése a valódi kulcson** (DisplayName szerint, `SystemComponent`+`NoRemove`/`NoModify`). Megjegyzés: zárolt állapotban a telepítőalapú frissítéshez előbb a jelszavas **Kilépés** kell (ez eltávolítja a szolgáltatást, az ACL-zárat, az uninstall-rejtést és a guard feladatot). |
+| **Kétnyelvű felület** | Magyar / angol, első indításkor automatikus felismeréssel (a Windows rendszernyelve alapján), bármikor váltható a főképernyő zászlós választójával vagy a Beállításokban; a választás megjegyzésre kerül. |
+| **Védelem (eltávolítás elleni)** | Mindig aktív, egy erős mag + egy könnyű tartalék (kernel-driver nélkül – az EV + Microsoft attestation-aláírást igényelne). **(a) LocalSystem guard-szolgáltatás** – boot-időben indul, automatikusan újraindul; SYSTEM-ként ~20 mp-enként újra-alkalmazza a védelmet. **(b) Percenkénti guard feladat** (a konzol-felhasználóhoz kötve, interaktívan) – bármilyen leállítás után ~60 mp-en belül visszahozza a GUI-t. A védelem: NTFS **ACL-zár** a telepítőmappán (a fájlok nem törölhetők) + a Vezérlőpult/Gépház eltávolító bejegyzésének **elrejtése a valódi kulcson** (DisplayName szerint, `SystemComponent`+`NoRemove`/`NoModify`). **A fájl-/registry-zár mellett ez a telepítő/eltávolító szintjén is érvényesül**: az eltávolító közvetlen futtatása (a rejtett Vezérlőpult-bejegyzés megkerülésével) vagy a telepítő újrafuttatása „frissítésként” többé nem szünteti meg csendben a védelmet — mindkettő az alkalmazás saját jelszavát kéri (az `uninstall_gate.js`-en keresztül, ugyanazzal az SHA-256 ellenőrzéssel, mint maga az app), mielőtt bármihez hozzányúlna, és 3 hibás próbálkozás vagy Mégse után teljesen megszakad. |
 | **Adatvédelem** | Nincs telemetria, nincs hálózati hívás, a böngészésből csak egy helyi számláló kerül lemezre. |
 
 ---
@@ -275,16 +284,22 @@ Windows/
 │   ├── protection.js    Védelmi mag (ACL-zár, uninstall-elrejtés, guard task)
 │   ├── service.js       LocalSystem guard-szolgáltatás törzse (protection.js újra-alkalmazás)
 │   ├── service_control.js  A guard-szolgáltatás telepítése/eltávolítása (node-windows)
+│   ├── uninstall_gate.js  Jelszó-zsilip, amit a NSIS telepítő/eltávolító hív meg minden
+│   │                      védelem-visszavonás előtt (l. 2./9. pont) — ugyanaz az SHA-256 ellenőrzés, mint az appban
 │   ├── i18n.js          Renderer fordítások (EN / HU)
 │   ├── theme.css        Egyetlen közös stíluslap minden ablakhoz (automatikus világos/sötét)
-│   ├── index.html       Vezérlőpult
+│   ├── index.html       Vezérlőpult (benne a HU/EN zászlós nyelvváltóval)
 │   ├── settings.html    Beállítások (téma, nyelv, jelszó, időkeret, automatikus indítás, tiltólista)
 │   ├── screentime.html  Képernyőidő-gyűrű + idő hozzáadása / zároló képernyő
 │   ├── blocked.html     Helyi blokkoló oldal a böngészőben
 │   ├── notification.html Buborék egy tiltott cím esetén
 │   ├── exit.html        Jelszókérő a kilépéshez
 │   └── version_bump.js  A verziót <major>.<minor>.<git-commit-szám> alakra állítja buildkor
-├── assets/              Alkalmazás-ikonok (png + win/icon.ico)
+├── assets/
+│   ├── icons/           Alkalmazás-ikonok (png + win/icon.ico)
+│   ├── installer.nsh    Egyéni NSIS hookok — a telepítő/eltávolító jelszó-zsilipje
+│   ├── pw_prompt.ps1    A zsilip által mutatott, maszkolt jelszómező (HU/EN auto-felismeréssel)
+│   └── psblock_gate.bat Az uninstall_gate.js-t futtatja "Node-ként" a zsilip nsExec hívásaihoz
 ├── build.bat            Egygombos build szkript
 ├── package.json         Alkalmazás + electron-builder konfiguráció
 └── package-lock.json
@@ -309,7 +324,7 @@ mentett `theme` beállításból (`system` / `light` / `dark`) állítja a
 A beállítások helye:
 
 ```
-%APPDATA%\STRIPARCO\config.json
+%APPDATA%\PS-BLOCK\config.json
 ```
 
 | Kulcs | Jelentés |
@@ -345,7 +360,7 @@ build.bat
 
 A `build.bat` lefuttatja az `npm install`-t, növeli a verziót (`version_bump.js`),
 ellenőrzi az ikont, majd lefuttatja az `npm run dist`-et (electron-builder, NSIS, x64 +
-ia32). A telepítő helye: `Windows/dist/STRIPARCO Setup <verzió>.exe`.
+ia32). A telepítő helye: `Windows/dist/PS-BLOCK Setup <verzió>.exe`.
 
 A telepítő rendszergazdai jogot kér, amely a `hosts` fájl módosításához szükséges.
 
@@ -367,5 +382,6 @@ A telepítő rendszergazdai jogot kér, amely a `hosts` fájl módosításához 
 | Az oldalak nem blokkolódnak | Az alkalmazásnak rendszergazdai jog kell a `hosts` íráshoz. Telepítsd újra / futtasd emelt jogon. |
 | Egy tiltott cím rövid ideig még látszik | Az átirányításhoz a böngészőablaknak fókuszban kell lennie; a következő figyelési körben (~1 mp) újrapróbálja. |
 | Az alkalmazás bezárás után újranyílik | Ez normális: a guard task/szolgáltatás újraindítja. Végleges leállítás: tálca → Kilépés (jelszóval). |
-| Nem tudom eltávolítani a Gépházból / Vezérlőpultból | Ez szándékos: a bejegyzés rejtve van, a telepítőmappa ACL-zárolt, amíg a védelem aktív. Előbb tálca → Kilépés (jelszóval) – ez eltávolítja a szolgáltatást, az ACL-zárat és az uninstall-rejtést –, utána normálisan eltávolítható. |
+| Nem tudom eltávolítani a Gépházból / Vezérlőpultból | Ez szándékos: a bejegyzés rejtve van, amíg a védelem aktív. Vagy tálca → Kilépés (jelszóval) előbb, vagy keresd meg az eltávolítót közvetlenül (a telepítési mappában) és futtasd — az magától kéri majd a jelszót, mielőtt bármit is töröl (lásd 9. pont lent). |
+| A telepítő/eltávolító jelszót kér | Ez elvárt működés, ha be van állítva jelszó: ez a visszaélés elleni zsilip (2. pont), nem hiba. Add meg az alkalmazás jelszavát; 3 hibás próbálkozás vagy Mégse után semmi nem törlődik, a telepítés/frissítés/eltávolítás megszakad. |
 | A téma nem egyezik a Windows-zal | Állítsd a témát **Rendszer szerint**-re a Beállításokban, vagy válassz kézzel Világos/Sötét értéket. |

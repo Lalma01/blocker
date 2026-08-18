@@ -1,4 +1,4 @@
-package com.striparco.app
+package com.psblock.app
 
 import android.app.PendingIntent
 import android.content.Intent
@@ -49,7 +49,7 @@ class FilterVpnService : VpnService() {
     }
 
     private fun buildNotification() =
-        NotificationCompat.Builder(this, StriparcoApp.CH_SERVICE)
+        NotificationCompat.Builder(this, PsBlockApp.CH_SERVICE)
             .setContentTitle(getString(R.string.app_name))
             .setContentText(getString(R.string.notif_filter_active))
             .setSmallIcon(R.drawable.ic_shield)
@@ -64,7 +64,7 @@ class FilterVpnService : VpnService() {
 
     private fun startTunnel() {
         val builder = Builder()
-            .setSession("STRIPARCO")
+            .setSession("PS-BLOCK")
             .addAddress("10.111.222.1", 24)
             .addDnsServer(virtualDns)
             .addRoute(virtualDns, 32)
@@ -86,7 +86,7 @@ class FilterVpnService : VpnService() {
         val pfd = try { builder.establish() } catch (e: Exception) { null } ?: return
         tun = pfd
         running = true
-        worker = thread(name = "striparco-dns") { loop(pfd) }
+        worker = thread(name = "psblock-dns") { loop(pfd) }
     }
 
     private fun loop(pfd: ParcelFileDescriptor) {
@@ -258,7 +258,7 @@ class FilterVpnService : VpnService() {
     }
 
     companion object {
-        const val ACTION_STOP = "com.striparco.app.STOP_VPN"
+        const val ACTION_STOP = "com.psblock.app.STOP_VPN"
         private const val NOTIF_ID = 1001
     }
 }
